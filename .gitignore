@@ -1,0 +1,13 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+data/patients/
+.DS_Store
+*.egg-info/
+dist/
+build/
+.adk/
+*.db
+.pytest_cache/
