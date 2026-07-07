@@ -142,6 +142,7 @@ Analyzing Kyle's medication list...
 ---
 
 ## Architecture
+![MedGuard Architecture](Images/Medguard_arch.png)
 
 MedGuard runs a 4-agent sequential pipeline using Google ADK:
 ```
