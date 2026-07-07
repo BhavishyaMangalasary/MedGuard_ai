@@ -142,52 +142,23 @@ Analyzing Kyle's medication list...
 ---
 
 ## Architecture
+
 ![MedGuard Architecture](Images/Medguard_arch.png)
 
 MedGuard runs a 4-agent sequential pipeline using Google ADK:
 ```
-User input (plain text medication list)
-               │
-               ▼
-┌──────────────────────────────┐
-│                              │  Normalizes messy conversational input into
-│                              │  structured records: name, dose, frequency,
-│        Intake Agent          │  prescriber, days supply, last filled.
-│                              │  Never asks for more info -- marks missing
-│                              │  fields as unknown and processes immediately.
-└──────────────┬───────────────┘
-               │
-               ▼
-┌──────────────────────────────┐
-│                              |
-│    Conflict & Risk Agent     │  Calls get_drug_safety_info tool to
-│                              │  pull live FDA label text for every drug.
-│ [Tool: get_drug_safety_info] │  Reasons across the FULL list to flag:
-│ [Tool: get_drug_research_    │  - Drug-drug interaction risks
-│    fallback (Antigravity)]   │  - Timing conflicts
-│                              │  - Prescriber blind spots
-│                              │  Uses Antigravity as fallback for drugs
-│                              │  with no FDA label. Every flag is tagged
-│                              │  with severity and label section citation.
-└──────────────┬───────────────┘
-               │
-               ▼
-┌──────────────────────────────┐
-│   Scheduler & Gap Agent      │  Builds a practical daily schedule respecting
-│                              │  timing conflict flags. Calculates refill gaps
-│                              │  from days_supply and last_filled date.
-└──────────────┬───────────────┘
-               │
-               ▼
-┌──────────────────────────────┐
-│       Reporter Agent         │  The ONLY agent whose output the user reads.
-│                              │  Synthesizes everything into one short brief
-│                              │  with citations, confidence levels, schedule,
-│                              │  refill alerts, and hardcoded disclaimer.
-└──────────────────────────────┘
-```
+- Intake Agent : Normalizes messy conversational input into structured records: name, dose, frequency, prescriber, days supply, last filled.
+                 Never asks for more info -- marks missing fields as unknown and processes immediately.
+- Conflict & Risk Agent : Calls get_drug_safety_info tool to pull live FDA label text for every drug. Reasons across the FULL list to flag:
+                          Drug-drug interaction risks, Timing conflicts, Prescriber blind spots. Uses Antigravity as fallback for drugs with no FDA label.
+                          Every flag is tagged with severity and label section citation.
+- Scheduler & Gap Agent : Builds a practical daily schedule respecting timing conflict flags. Calculates refill gaps from days_supply and last_filled date.
+- Reporter Agent : The ONLY agent whose output the user reads. Synthesizes everything into one short brief with citations, confidence levels, schedule, refill alerts, and hardcoded disclaimer.
+
+
 Each agent has a single responsibility. ADK's `SequentialAgent` handles all
 context passing between agents automatically.
+```
 
 ---
 
